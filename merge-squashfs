@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+LC_ALL=C
 
 perm_to_num() {
     case $1 in
@@ -85,21 +86,12 @@ unsquash_to_pseudofile() {
 
 find_to_pseudofile() {
     inputdir=$1
-    while read perms skip uid gid size month day time path rest; do
-        path=$(echo $path | sed -e "s^$inputdir^^")
-        case $perms in
-            l*)
-                symlink_file $perms root/root arg3 arg4 arg5 $path
-                ;;
-            d*)
-                directory_file $perms root/root arg3 arg4 arg5 $path
-                ;;
-            -*)
-                regular_file $perms root/root arg3 arg4 arg5 $path
-                ;;
-            *)
-        esac
-    done < <(find $inputdir -exec ls -ld "{}" ";")
+    while read mode path; do
+        path=$(echo $path | sed -e "s^$inputdir^^" | sed -e "s/ /\\\\ /g")
+        if [[ ! -z $path ]]; then
+            echo "$path m $mode root root"
+        fi
+    done < <(find $inputdir -exec stat -c "%a %n" "{}" ";")
 }
 
 
@@ -136,8 +128,11 @@ fi
 workdir=`mktemp -d 2>/dev/null || mktemp -d -t 'merge-squashfs-tmp'`
 pushd $workdir >/dev/null
 
-unsquash_to_pseudofile $input_squashfs >pseudofile
-find_to_pseudofile $overlay_dir >>pseudofile
+unsquash_to_pseudofile $input_squashfs >pseudofile.in
+find_to_pseudofile $overlay_dir >>pseudofile.in
+
+# remove repeated entries to avoid warnings from mksquashfs
+awk '!x[$1]++' pseudofile.in > pseudofile
 
 unsquashfs $input_squashfs >/dev/null 2>/dev/null
 cp -R $overlay_dir/. $workdir/squashfs-root
@@ -146,4 +141,3 @@ mksquashfs squashfs-root $output_squashfs -pf pseudofile -noappend
 # cleanup
 popd >/dev/null
 rm -fr $workdir
-
