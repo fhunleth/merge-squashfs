@@ -8,13 +8,17 @@ perm_to_num() {
         ?rws--x--x) echo "4711" ;;
         ?rwxrwxrwt) echo "1777" ;;
         ?rwxrwxrwx) echo "777" ;;
+        ?rwxrwxr-x) echo "775" ;;
         ?rwxr-xr-x) echo "755" ;;
+        ?rwxr-x---) echo "750" ;;
         ?rwx------) echo "700" ;;
         ?rw-rw-rw-) echo "666" ;;
+        ?rw-rw-r--) echo "664" ;;
         ?rw-r--r--) echo "644" ;;
         ?rw--w--w-) echo "622" ;;
         ?rw-------) echo "600" ;;
         ?r--r--r--) echo "444" ;;
+        ?r--r-----) echo "440" ;;
         ?r--------) echo "400" ;;
         *) echo "huh"
     esac
@@ -55,7 +59,7 @@ regular_file() {
     echo "$(get_path $6) m $(perm_to_num $1) $(owner_to_uid_gid $2)"
 }
 
-create_pseudofile() {
+unsquash_to_pseudofile() {
     input=$1
     while read perms owner rest; do
         case $perms in
@@ -78,6 +82,26 @@ create_pseudofile() {
         esac
     done < <(unsquashfs -n -ll $input)
 }
+
+find_to_pseudofile() {
+    inputdir=$1
+    while read perms skip uid gid size month day time path rest; do
+        path=$(echo $path | sed -e "s^$inputdir^^")
+        case $perms in
+            l*)
+                symlink_file $perms root/root arg3 arg4 arg5 $path
+                ;;
+            d*)
+                directory_file $perms root/root arg3 arg4 arg5 $path
+                ;;
+            -*)
+                regular_file $perms root/root arg3 arg4 arg5 $path
+                ;;
+            *)
+        esac
+    done < <(find $inputdir -exec ls -ld "{}" ";")
+}
+
 
 # "readlink -f" implementation for BSD
 # This code was extracted from the Elixir shell scripts
@@ -109,19 +133,17 @@ if [[ ! -d $overlay_dir ]]; then
     exit 1
 fi
 
-# start fresh
-rm -f $output_squashfs
-
 workdir=`mktemp -d 2>/dev/null || mktemp -d -t 'merge-squashfs-tmp'`
-echo "Working in $workdir"
-pushd $workdir
+pushd $workdir >/dev/null
 
-create_pseudofile $input_squashfs >pseudofile
+unsquash_to_pseudofile $input_squashfs >pseudofile
+find_to_pseudofile $overlay_dir >>pseudofile
+
 unsquashfs $input_squashfs >/dev/null 2>/dev/null
-cp -R $overlay_dir/* $workdir/squashfs-root
-mksquashfs squashfs-root $output_squashfs -pf pseudofile
+cp -R $overlay_dir/. $workdir/squashfs-root
+mksquashfs squashfs-root $output_squashfs -pf pseudofile -noappend
 
 # cleanup
-popd
-#rm -fr $workdir
+popd >/dev/null
+rm -fr $workdir
 
