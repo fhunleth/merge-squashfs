@@ -1,8 +1,15 @@
 #!/bin/bash
 
+# Merge an overlay directory into a squashfs
+#
+# Usage: merge-squashfs input.squashfs output.squashfs overlay-dir
+#
+
 set -e
 LC_ALL=C
 
+# This implementation could be improved.
+# The list below hits the combinations that I see.
 perm_to_num() {
     case $1 in
         ?rwsr-xr-x) echo "4755" ;;
@@ -10,11 +17,13 @@ perm_to_num() {
         ?rwxrwxrwt) echo "1777" ;;
         ?rwxrwxrwx) echo "777" ;;
         ?rwxrwxr-x) echo "775" ;;
+        ?rwxrwx---) echo "770" ;;
         ?rwxr-xr-x) echo "755" ;;
         ?rwxr-x---) echo "750" ;;
         ?rwx------) echo "700" ;;
         ?rw-rw-rw-) echo "666" ;;
         ?rw-rw-r--) echo "664" ;;
+        ?rw-rw----) echo "660" ;;
         ?rw-r--r--) echo "644" ;;
         ?rw--w--w-) echo "622" ;;
         ?rw-------) echo "600" ;;
@@ -136,7 +145,7 @@ awk '!x[$1]++' pseudofile.in > pseudofile
 
 unsquashfs $input_squashfs >/dev/null 2>/dev/null
 cp -R $overlay_dir/. $workdir/squashfs-root
-mksquashfs squashfs-root $output_squashfs -pf pseudofile -noappend
+mksquashfs squashfs-root $output_squashfs -pf pseudofile -noappend -no-recovery -no-progress
 
 # cleanup
 popd >/dev/null
