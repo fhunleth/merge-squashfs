@@ -1,0 +1,15 @@
+#!/bin/sh
+
+#
+# Replace a file into the squashfs.
+#
+
+cat >$INPUT_SQUASHFS_PSEUDOFILE <<EOF
+original_file f 444 root root echo "hello"
+EOF
+
+touch $OVERLAY_DIR/original_file
+
+cat >$EXPECTED <<EOF
+-r--r--r-- root/root 0 squashfs-root/original_file
+EOF

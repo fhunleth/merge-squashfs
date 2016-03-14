@@ -1,0 +1,16 @@
+#!/bin/sh
+
+#
+# Merge a file into the squashfs.
+#
+
+cat >$INPUT_SQUASHFS_PSEUDOFILE <<EOF
+original_file f 444 root root echo "hello"
+EOF
+
+touch $OVERLAY_DIR/merged_file
+
+cat >$EXPECTED <<EOF
+-rw-r--r-- root/root 0 squashfs-root/merged_file
+-r--r--r-- root/root 6 squashfs-root/original_file
+EOF

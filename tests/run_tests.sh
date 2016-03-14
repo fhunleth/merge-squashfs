@@ -19,6 +19,10 @@ MERGE_SQUASHFS=$TESTS_DIR/../merge-squashfs
 LOCAL_USER=$(id -un)
 LOCAL_GROUP=$(id -gn)
 
+# Force the umask so that created files have consistent permissions between
+# platforms
+umask 0022
+
 [[ -e $MERGE_SQUASHFS ]] || ( echo "Build $MERGE_SQUASHFS first"; exit 1 )
 
 run() {

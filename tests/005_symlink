@@ -5,8 +5,8 @@
 # and check that it survives.
 #
 
-touch "$INPUT_SQUASHFS_ROOT/scary file"
+ln -s /someplace "$INPUT_SQUASHFS_ROOT/symlink"
 
 cat >$EXPECTED <<EOF
--rw-r--r-- luser/lgroup 0 squashfs-root/scary file
+lrwxrwxrwx luser/lgroup 10 squashfs-root/symlink -> /someplace
 EOF
