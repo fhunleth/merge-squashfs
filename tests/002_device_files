@@ -1,0 +1,49 @@
+#!/bin/sh
+
+#
+# Create a squashfs, run it through a merge with an empty directory
+# and check that it survives.
+#
+
+cat >$INPUT_SQUASHFS_PSEUDOFILE <<EOF
+blk_dev0 b 666 root root 3 4
+blk_dev1 b 666 root root 3 40
+blk_dev2 b 666 root root 3 140
+blk_dev3 b 666 root root 30 4
+blk_dev4 b 666 root root 30 40
+blk_dev5 b 666 root root 30 140
+blk_dev6 b 666 root root 130 4
+blk_dev7 b 666 root root 130 40
+blk_dev8 b 666 root root 130 140
+
+chr_dev0 c 666 root root 1 2
+chr_dev1 c 666 root root 1 20
+chr_dev2 c 666 root root 1 200
+chr_dev3 c 666 root root 10 2
+chr_dev4 c 666 root root 10 20
+chr_dev5 c 666 root root 10 200
+chr_dev6 c 666 root root 100 2
+chr_dev7 c 666 root root 100 20
+chr_dev8 c 666 root root 100 200
+EOF
+
+cat >$EXPECTED <<EOF
+brw-rw-rw- root/root 3, 4 squashfs-root/blk_dev0
+brw-rw-rw- root/root 3, 40 squashfs-root/blk_dev1
+brw-rw-rw- root/root 3,140 squashfs-root/blk_dev2
+brw-rw-rw- root/root 30, 4 squashfs-root/blk_dev3
+brw-rw-rw- root/root 30, 40 squashfs-root/blk_dev4
+brw-rw-rw- root/root 30,140 squashfs-root/blk_dev5
+brw-rw-rw- root/root 130, 4 squashfs-root/blk_dev6
+brw-rw-rw- root/root 130, 40 squashfs-root/blk_dev7
+brw-rw-rw- root/root 130,140 squashfs-root/blk_dev8
+crw-rw-rw- root/root 1, 2 squashfs-root/chr_dev0
+crw-rw-rw- root/root 1, 20 squashfs-root/chr_dev1
+crw-rw-rw- root/root 1,200 squashfs-root/chr_dev2
+crw-rw-rw- root/root 10, 2 squashfs-root/chr_dev3
+crw-rw-rw- root/root 10, 20 squashfs-root/chr_dev4
+crw-rw-rw- root/root 10,200 squashfs-root/chr_dev5
+crw-rw-rw- root/root 100, 2 squashfs-root/chr_dev6
+crw-rw-rw- root/root 100, 20 squashfs-root/chr_dev7
+crw-rw-rw- root/root 100,200 squashfs-root/chr_dev8
+EOF

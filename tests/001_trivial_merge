@@ -1,0 +1,14 @@
+#!/bin/sh
+
+#
+# Create a squashfs, run it through a merge with an empty directory
+# and check that it survives.
+#
+
+cat >$INPUT_SQUASHFS_PSEUDOFILE <<EOF
+test_file f 444 root root echo "hello"
+EOF
+
+cat >$EXPECTED <<EOF
+-r--r--r-- root/root 6 squashfs-root/test_file
+EOF
