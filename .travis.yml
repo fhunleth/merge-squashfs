@@ -1,7 +1,8 @@
 language: bash
 
-# Use the container-based infrastructure
-sudo: false
+# Use Trusty on Linux
+sudo: required
+dist: trusty
 
 os:
     - linux
@@ -18,6 +19,7 @@ before_install:
         brew update;
         brew install squashfs;
       fi
+    - mksquashfs -version
 
 script:
     - ./run_tests.sh
