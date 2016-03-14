@@ -1,0 +1,13 @@
+#!/bin/sh
+
+#
+# Create a squashfs, run it through a merge with an empty directory
+# and check that it survives.
+#
+
+touch "$INPUT_SQUASHFS_ROOT/scary file"
+chmod 644 "$INPUT_SQUASHFS_ROOT/scary file"
+
+cat >$EXPECTED <<EOF
+-rw-r--r-- luser/lgroup 0 squashfs-root/scary file
+EOF

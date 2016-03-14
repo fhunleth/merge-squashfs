@@ -36,11 +36,16 @@ run() {
     # Run the test script to setup files for the test
     source $TESTS_DIR/$TEST
 
-    # If the test creates a pseudofile, then use it to create the
-    # input.
-    if [[ -e $INPUT_SQUASHFS_PSEUDOFILE ]]; then
+    # Create the input squashfs if it wasn't provided
+    if [[ ! -e $INPUT_SQUASHFS ]]; then
         pushd $INPUT_SQUASHFS_ROOT >/dev/null
-        mksquashfs . $INPUT_SQUASHFS -pf $INPUT_SQUASHFS_PSEUDOFILE -no-progress >/dev/null
+        # If the test creates a pseudofile, then use it to create the
+        # input.
+        if [[ -e $INPUT_SQUASHFS_PSEUDOFILE ]]; then
+            mksquashfs . $INPUT_SQUASHFS -pf $INPUT_SQUASHFS_PSEUDOFILE -no-progress >/dev/null
+        else
+            mksquashfs . $INPUT_SQUASHFS -no-progress >/dev/null
+        fi
         popd >/dev/null
     fi
 
