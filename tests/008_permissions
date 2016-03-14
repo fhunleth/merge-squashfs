@@ -1,0 +1,48 @@
+#!/bin/sh
+
+#
+# Create a squashfs, run it through a merge with an empty directory
+# and check that it survives.
+#
+
+cat >$INPUT_SQUASHFS_PSEUDOFILE <<EOF
+test_file00 f 4755 root root echo "hello"
+test_file01 f 4711 root root echo "hello"
+test_file02 f 1777 root root echo "hello"
+test_file03 f 777 root root echo "hello"
+test_file04 f 775 root root echo "hello"
+test_file05 f 770 root root echo "hello"
+test_file06 f 755 root root echo "hello"
+test_file07 f 750 root root echo "hello"
+test_file08 f 700 root root echo "hello"
+test_file09 f 666 root root echo "hello"
+test_file10 f 664 root root echo "hello"
+test_file11 f 660 root root echo "hello"
+test_file12 f 644 root root echo "hello"
+test_file13 f 622 root root echo "hello"
+test_file14 f 600 root root echo "hello"
+test_file15 f 444 root root echo "hello"
+test_file16 f 440 root root echo "hello"
+test_file17 f 400 root root echo "hello"
+EOF
+
+cat >$EXPECTED <<EOF
+-rwsr-xr-x root/root 6 squashfs-root/test_file00
+-rws--x--x root/root 6 squashfs-root/test_file01
+-rwxrwxrwt root/root 6 squashfs-root/test_file02
+-rwxrwxrwx root/root 6 squashfs-root/test_file03
+-rwxrwxr-x root/root 6 squashfs-root/test_file04
+-rwxrwx--- root/root 6 squashfs-root/test_file05
+-rwxr-xr-x root/root 6 squashfs-root/test_file06
+-rwxr-x--- root/root 6 squashfs-root/test_file07
+-rwx------ root/root 6 squashfs-root/test_file08
+-rw-rw-rw- root/root 6 squashfs-root/test_file09
+-rw-rw-r-- root/root 6 squashfs-root/test_file10
+-rw-rw---- root/root 6 squashfs-root/test_file11
+-rw-r--r-- root/root 6 squashfs-root/test_file12
+-rw--w--w- root/root 6 squashfs-root/test_file13
+-rw------- root/root 6 squashfs-root/test_file14
+-r--r--r-- root/root 6 squashfs-root/test_file15
+-r--r----- root/root 6 squashfs-root/test_file16
+-r-------- root/root 6 squashfs-root/test_file17
+EOF
