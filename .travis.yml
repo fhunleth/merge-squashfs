@@ -1,0 +1,24 @@
+language: bash
+
+# Use the container-based infrastructure
+sudo: false
+
+os:
+    - linux
+    - osx
+
+addons:
+    apt:
+        packages:
+            - squashfs-tools
+
+
+before_install:
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        brew update;
+        brew install squashfs;
+      fi
+
+script:
+    - ./run_tests.sh
+
