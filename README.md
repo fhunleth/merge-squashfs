@@ -5,8 +5,12 @@ Merge a directory into a squashfs archive. Why? Currently `mksquashfs` only supp
 appending to archives. This allows for the addition of files, but not the replacement
 of files already in the archive. You may ask why you can't just `unsquashfs` the
 archive, replace the files and `mksquashfs`. Well, you can, but if you're running
-on a platform that lacks `fakeroot` and `fakechroot`, maintaining permissions, ownership,
+on a platform that lacks `fakeroot`, maintaining permissions, ownership,
 and special files requires more work. This script does the more work.
+
+Post-script: It is looking like I may get `fakeroot` on all of the platforms
+that I need to merge squashfs archives. If that's the case, it is likely that
+this script can be simplified so much that it is no longer needed. :)
 
 ## Installation
 
